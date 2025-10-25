@@ -2,10 +2,10 @@
 #define ESSENTIAL_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #if defined(VEC_I) || defined(STRING) || defined(SB)
 #include <stddef.h>
-#include <stdlib.h>
 #endif
 
 #define println(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
@@ -16,13 +16,13 @@ typedef enum { WARN, INFO, ERROR } LogLevel;
     do {                                                                       \
         switch ((log_level)) {                                                 \
         case WARN:                                                             \
-            println("[\x1b[1;33mWARN\x1b[0m]: " fmt, ##__VA_ARGS__);           \
+            println("[\x1b[1;33mw\x1b[0m]: " fmt, ##__VA_ARGS__);              \
             break;                                                             \
         case INFO:                                                             \
-            println("[\x1b[90mINFO\x1b[0m]: " fmt, ##__VA_ARGS__);             \
+            println("[\x1b[90mi\x1b[0m]: " fmt, ##__VA_ARGS__);                \
             break;                                                             \
         case ERROR:                                                            \
-            println("[\x1b[1;31mERROR\x1b[0m]: " fmt, ##__VA_ARGS__);          \
+            println("[\x1b[1;31me\x1b[0m]: " fmt, ##__VA_ARGS__);              \
             break;                                                             \
         default:                                                               \
             println("Err:Not a valid log level");                              \
