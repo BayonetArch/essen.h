@@ -33,7 +33,7 @@ static inline char *current_time(char *time_buf, size_t buf_size) {
 
 #define println(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 #define eprintln(fmt, ...)                                                     \
-  fprintf(stderr, "Error: " fmt "(`%s`)\n", LAST_ERROR, ##__VA_ARGS__)
+  fprintf(stderr, ANSI_RED("Error") ": " fmt "(`%s`)\n", LAST_ERROR, ##__VA_ARGS__)
 
 #define ARR_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 #define LAST_ERROR strerror(errno)
