@@ -10,7 +10,7 @@
 #include <stddef.h>
 #endif
 
-typedef enum : int { INFO = 0, WARN = 1, ERROR = 2 } LogLevel;
+typedef enum : int { LOG_INFO = 0, LOG_WARN = 1, LOG_ERROR = 2 } LogLevel;
 
 #define ARR_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 #define LAST_ERROR strerror(errno)
@@ -18,7 +18,8 @@ typedef enum : int { INFO = 0, WARN = 1, ERROR = 2 } LogLevel;
 #define SEPARATOR println("───────────────────────────────────────")
 
 #include <time.h>
-static inline char *current_time(char *time_buf, size_t buf_size) {
+
+static inline char *current_date(char *time_buf, size_t buf_size) {
   time_t t = time(NULL);
   struct tm date = *localtime(&t);
   strftime(time_buf, buf_size, "%Y-%m-%d %I:%M:%S", &date);
@@ -39,7 +40,6 @@ static inline char *current_time(char *time_buf, size_t buf_size) {
 #define ANSI_YELLOW_BOLD(x)         "\x1b[1;33m" x ANSI_RESET
 // clang-format on
 
-//  rust alike (;
 #define println(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 #define eprintln(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
@@ -50,15 +50,16 @@ static inline char *current_time(char *time_buf, size_t buf_size) {
     exit(exit_code);                                                           \
   } while (0)
 
-#define logf(fp, log_level, color, fmt, ...)                                   \
+#define flog(fp, log_level, color, fmt, ...)                                   \
   do {                                                                         \
     char time_buf[64];                                                         \
-    current_time(time_buf, sizeof(time_buf));                                  \
+    current_date(time_buf, sizeof(time_buf));                                  \
     switch ((log_level)) {                                                     \
-    case WARN:                                                                 \
+    case LOG_WARN:                                                             \
       if (color) {                                                             \
-        println("%s "                                                          \
-                "[" ANSI_YELLOW("WARN ") "] " fmt,                             \
+        fprintf(fp,                                                            \
+                "%s "                                                          \
+                "[" ANSI_YELLOW("WARN ") "] " fmt "\n",                        \
                 time_buf, ##__VA_ARGS__);                                      \
       } else {                                                                 \
         fprintf(fp,                                                            \
@@ -67,33 +68,41 @@ static inline char *current_time(char *time_buf, size_t buf_size) {
                 time_buf, ##__VA_ARGS__);                                      \
       }                                                                        \
       break;                                                                   \
-    case INFO:                                                                 \
+    case LOG_INFO:                                                             \
       if (color) {                                                             \
-        println("%s "                                                          \
-                "[" ANSI_GREY("INFO ") "] " fmt,                               \
+        fprintf(fp,                                                            \
+                "%s "                                                          \
+                "[" ANSI_GREY("INFO ") "] " fmt "\n",                          \
                 time_buf, ##__VA_ARGS__);                                      \
       } else {                                                                 \
         fprintf(fp,                                                            \
                 "%s "                                                          \
-                "[WARN ] " fmt "\n",                                           \
+                "[INFO ] " fmt "\n",                                           \
                 time_buf, ##__VA_ARGS__);                                      \
       }                                                                        \
       break;                                                                   \
-    case ERROR:                                                                \
+    case LOG_ERROR:                                                            \
       if (color) {                                                             \
-        println("%s "                                                          \
-                "[" ANSI_RED("ERROR") "] " fmt,                                \
+        fprintf(fp,                                                            \
+                "%s "                                                          \
+                "[" ANSI_RED("ERROR") "] " fmt "\n",                           \
                 time_buf, ##__VA_ARGS__);                                      \
       } else {                                                                 \
         fprintf(fp,                                                            \
                 "%s "                                                          \
-                "[WARN ] " fmt "\n",                                           \
+                "[ERROR] " fmt "\n",                                           \
                 time_buf, ##__VA_ARGS__);                                      \
       }                                                                        \
       break;                                                                   \
     default:                                                                   \
       fatalf(1, "Not a valid log level");                                      \
     };                                                                         \
+  } while (0)
+
+#define fflog(fp1, fp2, log_level, color_for_f1, color_for_f2, fmt, ...)       \
+  do {                                                                         \
+    flog(fp1, log_level, color_for_f1, fmt, ##__VA_ARGS__);                    \
+    flog(fp2, log_level, color_for_f2, fmt, ##__VA_ARGS__);                    \
   } while (0)
 
 #ifdef SB
