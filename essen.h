@@ -2,12 +2,20 @@
 #define ESSENTIAL_H
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #if defined(VEC_I) || defined(STRING) || defined(SB)
 #include <stddef.h>
 #endif
+
+typedef enum : int { INFO = 0, WARN = 1, ERROR = 2 } LogLevel;
+
+#define ARR_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
+#define LAST_ERROR strerror(errno)
+#define FILE_LOC __FILE__, __LINE__
+#define SEPARATOR println("───────────────────────────────────────")
 
 #include <time.h>
 static inline char *current_time(char *time_buf, size_t buf_size) {
@@ -37,171 +45,56 @@ static inline char *current_time(char *time_buf, size_t buf_size) {
 
 #define fatalf(exit_code, fmt, ...)                                            \
   do {                                                                         \
-    fprintf(stderr, ANSI_RED("Error") ": " fmt "(`%s`)\n", ##__VA_ARGS__,      \
-            LAST_ERROR);                                                       \
+    fprintf(stderr, ANSI_GREY("%s:%d") " " ANSI_RED("Error") ": " fmt "\n",    \
+            FILE_LOC, ##__VA_ARGS__);                                          \
     exit(exit_code);                                                           \
   } while (0)
 
-#define ARR_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
-#define LAST_ERROR strerror(errno)
-#define FILE_LOC __FILE__, __LINE__
-#define SEPARATOR println("───────────────────────────────────────")
-
-typedef enum { WARN, INFO, ERROR } LogLevel;
-
-#define log_msg(log_level, fmt, ...)                                           \
+#define logf(fp, log_level, color, fmt, ...)                                   \
   do {                                                                         \
     char time_buf[64];                                                         \
     current_time(time_buf, sizeof(time_buf));                                  \
     switch ((log_level)) {                                                     \
     case WARN:                                                                 \
-      println("%s "                                                            \
-              "[" ANSI_YELLOW("WARN ") "] " fmt,                               \
-              time_buf, ##__VA_ARGS__);                                        \
+      if (color) {                                                             \
+        println("%s "                                                          \
+                "[" ANSI_YELLOW("WARN ") "] " fmt,                             \
+                time_buf, ##__VA_ARGS__);                                      \
+      } else {                                                                 \
+        fprintf(fp,                                                            \
+                "%s "                                                          \
+                "[WARN ] " fmt "\n",                                           \
+                time_buf, ##__VA_ARGS__);                                      \
+      }                                                                        \
       break;                                                                   \
     case INFO:                                                                 \
-      println("%s "                                                            \
-              "[" ANSI_GREY("INFO ") "] " fmt,                                 \
-              time_buf, ##__VA_ARGS__);                                        \
+      if (color) {                                                             \
+        println("%s "                                                          \
+                "[" ANSI_GREY("INFO ") "] " fmt,                               \
+                time_buf, ##__VA_ARGS__);                                      \
+      } else {                                                                 \
+        fprintf(fp,                                                            \
+                "%s "                                                          \
+                "[WARN ] " fmt "\n",                                           \
+                time_buf, ##__VA_ARGS__);                                      \
+      }                                                                        \
       break;                                                                   \
     case ERROR:                                                                \
-      println("%s "                                                            \
-              "[" ANSI_RED("ERROR") "] " fmt,                                  \
-              time_buf, ##__VA_ARGS__);                                        \
+      if (color) {                                                             \
+        println("%s "                                                          \
+                "[" ANSI_RED("ERROR") "] " fmt,                                \
+                time_buf, ##__VA_ARGS__);                                      \
+      } else {                                                                 \
+        fprintf(fp,                                                            \
+                "%s "                                                          \
+                "[WARN ] " fmt "\n",                                           \
+                time_buf, ##__VA_ARGS__);                                      \
+      }                                                                        \
       break;                                                                   \
     default:                                                                   \
-      println("Error: Not a valid log level");                                 \
-      exit(1);                                                                 \
+      fatalf(1, "Not a valid log level");                                      \
     };                                                                         \
   } while (0)
-
-#define log_to_file(log_level, fp, fmt, ...)                                   \
-  do {                                                                         \
-    char time_buf[64];                                                         \
-    current_time(time_buf, sizeof(time_buf));                                  \
-    switch ((log_level)) {                                                     \
-    case WARN:                                                                 \
-      fprintf(fp,                                                              \
-              "%s "                                                            \
-              "[WARN ] " fmt "\n",                                             \
-              time_buf, ##__VA_ARGS__);                                        \
-      break;                                                                   \
-    case INFO:                                                                 \
-      fprintf(fp,                                                              \
-              "%s "                                                            \
-              "[INFO ] " fmt "\n",                                             \
-              time_buf, ##__VA_ARGS__);                                        \
-      break;                                                                   \
-    case ERROR:                                                                \
-      fprintf(fp,                                                              \
-              "%s "                                                            \
-              "[ERROR] " fmt "\n",                                             \
-              time_buf, ##__VA_ARGS__);                                        \
-      break;                                                                   \
-    default:                                                                   \
-      println("Error: Not a valid log level");                                 \
-      exit(1);                                                                 \
-    };                                                                         \
-  } while (0)
-
-#ifdef VEC_I
-typedef struct {
-  int *items;
-  size_t size;
-  size_t capacity;
-} VecInt;
-
-static inline void veci_init(VecInt *v, size_t initial_cap) {
-  v->items = (int *)malloc(sizeof(int) * initial_cap);
-  if (v->items == NULL) {
-    fatalf(1, "Memory allocation failed");
-  }
-  v->capacity = initial_cap;
-  v->size = 0;
-}
-
-static inline void veci_push(VecInt *s, int item) {
-  if (s->size == s->capacity) {
-    s->capacity *= 2;
-    int *data = (int *)realloc(s->items, s->capacity * sizeof(int));
-    if (data == NULL) {
-      fatalf(1, "Memory allocation failed");
-    }
-    s->items = data;
-  }
-
-  s->items[s->size++] = item;
-}
-
-static inline int veci_get(VecInt *s, size_t indx) {
-  if (indx < 0 || indx >= s->size) {
-    fatalf(1, "Trying to access out of bound index");
-  }
-
-  return s->items[indx];
-}
-
-static inline void veci_free(VecInt *s) {
-  free(s->items);
-  s->items = NULL;
-  s->capacity = 0;
-  s->size = 0;
-}
-
-#endif // VEC_I
-
-#ifdef STRING
-typedef struct {
-  char **str;
-  size_t size;
-  size_t capacity;
-} String;
-
-static inline void string_init(String *s, int initial_cap) {
-  s->str = (char **)malloc(sizeof(char *) * initial_cap);
-  if (s->str == NULL) {
-    fatalf(1, "Memory allocation failed");
-  }
-  s->capacity = initial_cap;
-  s->size = 0;
-}
-
-static inline void string_append(String *s, char *str) {
-  if (s->capacity == s->size) {
-    s->capacity *= 2;
-    char **i = (char **)realloc(s->str, s->capacity * sizeof(char *));
-    if (i == NULL) {
-      fatalf(1, "Memory allocation failed");
-    }
-    s->str = i;
-  }
-  s->str[s->size] = strdup(str);
-  if (!s->str[s->size]) {
-    fatalf(1, "strdup failed");
-  }
-  s->size++;
-}
-
-static inline char *string_get(String *s, size_t indx) {
-  if (indx < 0 || indx >= s->size) {
-    fatalf(1, "Invalid index");
-  }
-
-  return s->str[indx];
-}
-
-static inline void string_free(String *s) {
-  for (size_t i = 0; i < s->size; i++) {
-    free(s->str[i]);
-  }
-  free(s->str);
-
-  s->str = NULL;
-  s->size = 0;
-  s->capacity = 0;
-}
-
-#endif // STRING
 
 #ifdef SB
 
@@ -229,7 +122,7 @@ void sb_append(StringBuilder *sb, char *str) {
   }
   char *tmp = realloc(sb->buf, sb->capacity);
   if (!tmp) {
-    fatalf(1, "%d Reallocation failed", __LINE__);
+    fatalf(1, "Reallocation failed");
   }
   sb->buf = tmp;
   memcpy(sb->buf + sb->size, str, n);
