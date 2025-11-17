@@ -48,7 +48,7 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
 #define fatalf(exit_code, fmt, ...)                                            \
     do {                                                                       \
         fprintf(stderr,                                                        \
-                ANSI_GREY("%s:%d") " " ANSI_RED("Error") ": " fmt "\n",        \
+                ANSI_GREY("%s:%d") " " ANSI_RED("Fatal") ": " fmt "\n",        \
                 FILE_LOC(), ##__VA_ARGS__);                                    \
         exit(exit_code);                                                       \
     } while (0)
