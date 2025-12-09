@@ -108,6 +108,19 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
         flog(fp2, log_level, color_for_f2, fmt, ##__VA_ARGS__);                \
     } while (0)
 
+static inline const char *shift_args(int *argc, char **argv) {
+    if (*argc == 1)
+        return NULL;
+
+    const char *program = argv[0];
+    for (int i = 0; i < *argc - 1; ++i) {
+        argv[i] = argv[i + 1];
+    }
+
+    (*argc)--;
+    return program;
+}
+
 #ifdef SB
 
 typedef struct {
