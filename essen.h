@@ -139,7 +139,7 @@ static inline void sb_init(StringBuilder *sb) {
     sb->size = 0;
 }
 
-void sb_append(StringBuilder *sb, char *str) {
+static inline void sb_append(StringBuilder *sb, char *str) {
     size_t n = strlen(str);
 
     while (sb->size + n > sb->capacity) {
@@ -154,13 +154,13 @@ void sb_append(StringBuilder *sb, char *str) {
     sb->size += n;
 }
 
-char *sb_to_string(StringBuilder *sb) {
+static inline char *sb_to_string(StringBuilder *sb) {
     sb->buf[sb->size] = '\0';
 
     return sb->buf;
 }
 
-void sb_free(StringBuilder *sb) {
+static inline void sb_free(StringBuilder *sb) {
     free(sb->buf);
     sb->buf      = NULL;
     sb->capacity = 0;
