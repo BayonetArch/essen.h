@@ -13,6 +13,13 @@ typedef enum : int { LOG_INFO = 0, LOG_WARN = 1, LOG_ERROR = 2 } LogLevel;
 #define FILE_LOC() __FILE__, __LINE__
 #define SEPARATOR() println("───────────────────────────────────────")
 
+#define SWAP(T, a, b)                                                          \
+    do {                                                                       \
+        T t = a;                                                               \
+        a   = b;                                                               \
+        b   = t;                                                               \
+    } while (0)
+
 #define UNUSED(x) (void)x
 
 #include <time.h>
@@ -148,14 +155,24 @@ static inline const char *shift_args(int *argc, char **argv)
 
 #define da_free(xs)                                                            \
     do {                                                                       \
-        free(xs.item);                                                         \
-        (xs).item     = NULL;                                                  \
-        (xs).capacity = 0;                                                     \
-        (xs).count    = 0;                                                     \
+        free((xs)->item);                                                      \
+        ((xs))->item     = NULL;                                               \
+        ((xs))->capacity = 0;                                                  \
+        ((xs))->count    = 0;                                                  \
     } while (0)
 
 #define da_foreach(Type, it, da)                                               \
     for (Type *it = (da)->item; it < (da)->item + (da)->count; ++it)
+
+#define da_free_heap(type, xs)                                                 \
+    do {                                                                       \
+        da_foreach(type, it, xs) { free(*it); }                                \
+        da_free((xs));                                                         \
+        (xs)->item     = NULL;                                                 \
+        (xs)->capacity = 0;                                                    \
+        (xs)->count    = 0;                                                    \
+    } while (0);
+
 #endif // DA
 
 #ifdef SB
