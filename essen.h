@@ -6,10 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(VEC_I) || defined(STRING) || defined(SB)
-#include <stddef.h>
-#endif
-
 typedef enum : int { LOG_INFO = 0, LOG_WARN = 1, LOG_ERROR = 2 } LogLevel;
 
 #define ARR_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -21,7 +17,8 @@ typedef enum : int { LOG_INFO = 0, LOG_WARN = 1, LOG_ERROR = 2 } LogLevel;
 
 #include <time.h>
 
-static inline char *current_date(char *time_buf, size_t buf_size) {
+static inline char *current_date(char *time_buf, size_t buf_size)
+{
     time_t    t    = time(NULL);
     struct tm date = *localtime(&t);
     strftime(time_buf, buf_size, "%Y-%m-%d %I:%M:%S", &date);
@@ -53,6 +50,7 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
         exit(exit_code);                                                       \
     } while (0)
 
+// file logging
 #define flog(fp, log_level, color, fmt, ...)                                   \
     do {                                                                       \
         char time_buf[64];                                                     \
@@ -64,7 +62,8 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
                         "%s "                                                  \
                         "[" ANSI_YELLOW("WARN ") "] " fmt "\n",                \
                         time_buf, ##__VA_ARGS__);                              \
-            } else {                                                           \
+            }                                                                  \
+            else {                                                             \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
                         "[WARN ] " fmt "\n",                                   \
@@ -77,7 +76,8 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
                         "%s "                                                  \
                         "[" ANSI_GREY("INFO ") "] " fmt "\n",                  \
                         time_buf, ##__VA_ARGS__);                              \
-            } else {                                                           \
+            }                                                                  \
+            else {                                                             \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
                         "[INFO ] " fmt "\n",                                   \
@@ -90,7 +90,8 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
                         "%s "                                                  \
                         "[" ANSI_RED("ERROR") "] " fmt "\n",                   \
                         time_buf, ##__VA_ARGS__);                              \
-            } else {                                                           \
+            }                                                                  \
+            else {                                                             \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
                         "[ERROR] " fmt "\n",                                   \
@@ -108,7 +109,8 @@ static inline char *current_date(char *time_buf, size_t buf_size) {
         flog(fp2, log_level, color_for_f2, fmt, ##__VA_ARGS__);                \
     } while (0)
 
-static inline const char *shift_args(int *argc, char **argv) {
+static inline const char *shift_args(int *argc, char **argv)
+{
     if (*argc == 1)
         return NULL;
 
@@ -121,7 +123,41 @@ static inline const char *shift_args(int *argc, char **argv) {
     return program;
 }
 
+#ifdef DA
+
+#define DA_DEF_CAP 256
+
+#define da_append(xs, type, x)                                                 \
+    do {                                                                       \
+        if ((xs).capacity == 0) {                                              \
+            (xs).capacity = DA_DEF_CAP;                                        \
+            (xs).item     = malloc((xs).capacity * sizeof(type));              \
+            if (!(xs).item)                                                    \
+                fatalf(1, "memory allocation failed");                         \
+        }                                                                      \
+        else if ((xs).count >= (xs).capacity) {                                \
+            (xs).capacity *= 2;                                                \
+            void *tmp = realloc((xs).item, xs.capacity * sizeof(type));        \
+            if (!tmp)                                                          \
+                fatalf(1, "memory reallocation failed");                       \
+            (xs).item = tmp;                                                   \
+        }                                                                      \
+        (xs).item[(xs).count++] = x;                                           \
+    } while (0)
+
+#define da_free(xs)                                                            \
+    do {                                                                       \
+        free(xs.item);                                                         \
+        (xs).item     = NULL;                                                  \
+        (xs).capacity = 0;                                                     \
+        (xs).count    = 0;                                                     \
+    } while (0)
+
+#endif // DA
+
 #ifdef SB
+
+#include <stddef.h>
 
 typedef struct {
     char  *buf;
@@ -130,7 +166,8 @@ typedef struct {
 
 } StringBuilder;
 
-static inline void sb_init(StringBuilder *sb) {
+static inline void sb_init(StringBuilder *sb)
+{
     sb->capacity = 16;
     sb->buf      = malloc(sb->capacity);
     if (!sb->buf) {
@@ -139,7 +176,8 @@ static inline void sb_init(StringBuilder *sb) {
     sb->size = 0;
 }
 
-static inline void sb_append(StringBuilder *sb, char *str) {
+static inline void sb_append(StringBuilder *sb, char *str)
+{
     size_t n = strlen(str);
 
     while (sb->size + n > sb->capacity) {
@@ -154,13 +192,15 @@ static inline void sb_append(StringBuilder *sb, char *str) {
     sb->size += n;
 }
 
-static inline char *sb_to_string(StringBuilder *sb) {
+static inline char *sb_to_string(StringBuilder *sb)
+{
     sb->buf[sb->size] = '\0';
 
     return sb->buf;
 }
 
-static inline void sb_free(StringBuilder *sb) {
+static inline void sb_free(StringBuilder *sb)
+{
     free(sb->buf);
     sb->buf      = NULL;
     sb->capacity = 0;
