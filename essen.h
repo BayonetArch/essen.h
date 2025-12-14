@@ -127,22 +127,23 @@ static inline const char *shift_args(int *argc, char **argv)
 
 #define DA_DEF_CAP 256
 
-#define da_append(xs, type, x)                                                 \
+#define da_append(xs, x)                                                       \
     do {                                                                       \
-        if ((xs).capacity == 0) {                                              \
-            (xs).capacity = DA_DEF_CAP;                                        \
-            (xs).item     = malloc((xs).capacity * sizeof(type));              \
-            if (!(xs).item)                                                    \
+        if ((xs)->capacity == 0) {                                             \
+            (xs)->capacity = DA_DEF_CAP;                                       \
+            (xs)->item     = malloc((xs)->capacity * sizeof(*(xs)->item));     \
+            if (!(xs)->item)                                                   \
                 fatalf(1, "memory allocation failed");                         \
         }                                                                      \
-        else if ((xs).count >= (xs).capacity) {                                \
-            (xs).capacity *= 2;                                                \
-            void *tmp = realloc((xs).item, xs.capacity * sizeof(type));        \
+        else if ((xs)->count >= (xs)->capacity) {                              \
+            (xs)->capacity *= 2;                                               \
+            void *tmp =                                                        \
+                realloc((xs)->item, (xs)->capacity * sizeof(*(xs)->item));     \
             if (!tmp)                                                          \
                 fatalf(1, "memory reallocation failed");                       \
-            (xs).item = tmp;                                                   \
+            (xs)->item = tmp;                                                  \
         }                                                                      \
-        (xs).item[(xs).count++] = x;                                           \
+        (xs)->item[(xs)->count++] = x;                                         \
     } while (0)
 
 #define da_free(xs)                                                            \
@@ -153,6 +154,8 @@ static inline const char *shift_args(int *argc, char **argv)
         (xs).count    = 0;                                                     \
     } while (0)
 
+#define da_foreach(Type, it, da)                                               \
+    for (Type *it = (da)->item; it < (da)->item + (da)->count; ++it)
 #endif // DA
 
 #ifdef SB
