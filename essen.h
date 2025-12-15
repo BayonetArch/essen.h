@@ -176,7 +176,7 @@ static inline const char *shift_args(int *argc, char **argv)
 #endif // DA
 
 #ifdef SB
-
+#define DEF_SB_CAP 64
 #include <stddef.h>
 
 typedef struct {
@@ -188,7 +188,7 @@ typedef struct {
 
 static inline void sb_init(StringBuilder *sb)
 {
-    sb->capacity = 16;
+    sb->capacity = DEF_SB_CAP;
     sb->buf      = malloc(sb->capacity);
     if (!sb->buf) {
         fatalf(1, "memory allocation failed");
