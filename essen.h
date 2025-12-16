@@ -91,13 +91,13 @@ __attribute__((unused)) static inline char *esl_current_date(char  *time_buf,
             if (color) {                                                       \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
-                        "[" ANSI_YELLOW("WARN ") "] " fmt "\n",                \
+                        "[" ANSI_YELLOW("WRN") "] " fmt "\n",                \
                         time_buf, ##__VA_ARGS__);                              \
             }                                                                  \
             else {                                                             \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
-                        "[WARN ] " fmt "\n",                                   \
+                        "[WRN] " fmt "\n",                                   \
                         time_buf, ##__VA_ARGS__);                              \
             }                                                                  \
             break;                                                             \
@@ -105,13 +105,13 @@ __attribute__((unused)) static inline char *esl_current_date(char  *time_buf,
             if (color) {                                                       \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
-                        "[" ANSI_GREY("INFO ") "] " fmt "\n",                  \
+                        "[" ANSI_GREY("INF") "] " fmt "\n",                  \
                         time_buf, ##__VA_ARGS__);                              \
             }                                                                  \
             else {                                                             \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
-                        "[INFO ] " fmt "\n",                                   \
+                        "[INF] " fmt "\n",                                   \
                         time_buf, ##__VA_ARGS__);                              \
             }                                                                  \
             break;                                                             \
@@ -119,13 +119,13 @@ __attribute__((unused)) static inline char *esl_current_date(char  *time_buf,
             if (color) {                                                       \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
-                        "[" ANSI_RED("ERROR") "] " fmt "\n",                   \
+                        "[" ANSI_RED("ERR") "] " fmt "\n",                   \
                         time_buf, ##__VA_ARGS__);                              \
             }                                                                  \
             else {                                                             \
                 fprintf(fp,                                                    \
                         "%s "                                                  \
-                        "[ERROR] " fmt "\n",                                   \
+                        "[ERR] " fmt "\n",                                   \
                         time_buf, ##__VA_ARGS__);                              \
             }                                                                  \
             break;                                                             \
