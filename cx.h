@@ -87,7 +87,7 @@ static inline char *cx_current_date(char *time_buf, size_t buf_size)
 #define cx_fatalc(fmt, ...)                                                    \
     do {                                                                       \
         fprintf(stderr,                                                        \
-                ANSI_GREY("%s:%d") " " ANSI_RED("fatal error") ": " fmt "\n",  \
+                ANSI_GREY("%s:%d:") " " ANSI_RED("fatal error") ": " fmt "\n",  \
                 CX_FILE_LOC(), ##__VA_ARGS__);                                 \
         exit(1);                                                               \
     } while (0);

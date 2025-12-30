@@ -1,7 +1,9 @@
 #define CX_STRIP_PREFIX
 #define CX_DA
 #define CX_SB
+
 #include "cx.h"
+#include <check.h>
 
 typedef struct {
     char **items;
@@ -9,11 +11,10 @@ typedef struct {
     size_t capacity;
 } Da;
 
-#define LOG_TESTFUNCTION() (LOGC(LOG_INFO, "%s", __FUNCTION__))
+#define LOG_TESTFUNCTION() LOGC(LOG_INFO, "%s", __FUNCTION__)
 
-void test_logging()
+START_TEST(test_logging)
 {
-    LOG_TESTFUNCTION();
     const char *path = "test.log";
 
     LOG(LOG_INFO, "Some useful info..");
@@ -23,13 +24,12 @@ void test_logging()
 
     LOGFILE(fp, LOG_WARN, "the file name is %s", path);
     fclose(fp);
-
-    LOGC(LOG_ERROR, "Something went wrong Error:%d", 420);
+    LOGC(LOG_ERROR, "Something went wrong Error: %d", 420);
 }
-void test_da()
+
+START_TEST(test_da)
 {
 
-    LOG_TESTFUNCTION();
     Da da = {0};
 
     da_append(&da, "foo");
@@ -39,45 +39,53 @@ void test_da()
     da_foreach(char *, x, &da)
     {
         size_t index = x - da.items;
-        println("item at index %ld = %s", index, (*x));
+        ck_assert(da.items[index] == (*x));
     }
+
     da_free(&da);
+    ck_assert(da.items == NULL);
 }
 
-void test_sb()
+START_TEST(test_sb)
 {
 
-    LOG_TESTFUNCTION();
     StringBuilder sb = {0};
     sb_init(&sb);
     sb_append(&sb, "foo");
-
     sb_append(&sb, " ");
-
     sb_append(&sb, "bar");
-    println("%s", sb_tostring(&sb));
+
+    ck_assert(strcmp(sb_tostring(&sb), "foo bar") == 0);
     sb_free(&sb);
+    ck_assert(sb.buf == NULL);
 }
 
-void test_swap()
+START_TEST(test_swap)
 {
 
-    LOG_TESTFUNCTION();
     int a = 10;
     int b = 20;
-
-    println("before swapping a:b %d:%d", a, b);
     SWAP(int, a, b);
-
-    println("after swapping a:b %d:%d", a, b);
+    ck_assert(a == 20 && b == 10);
 }
+END_TEST
 
 int main(int argc, char *argv[])
 {
-    test_logging();
-    test_da();
-    test_sb();
-    test_swap();
+    Suite *s  = suite_create("Cx");
+    TCase *tc = tcase_create("Core");
+
+    tcase_add_test(tc, test_logging);
+    tcase_add_test(tc, test_da);
+    tcase_add_test(tc, test_sb);
+    tcase_add_test(tc, test_swap);
+
+    suite_add_tcase(s, tc);
+
+    SRunner *sr = srunner_create(s);
+    srunner_run_all(sr, CK_VERBOSE);
+    int failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
 
     if (argc > 1) {
         const char *program = shift_args(&argc, argv);
@@ -86,6 +94,5 @@ int main(int argc, char *argv[])
     } else {
         fatalc("No argument provided.");
     }
-
-    return 0;
+    return failed;
 }
