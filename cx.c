@@ -15,10 +15,10 @@ typedef struct {
 
 START_TEST(test_logging)
 {
-    const char *path = "test.log";
+    const char *path = "./test-out/test.log";
 
     LOG(LOG_INFO, "Some useful info..");
-    FILE *fp = fopen("./foo.txt", "w");
+    FILE *fp = fopen(path, "w");
     if (!fp)
         fatal("Could not open file:%s", LAST_ERROR());
 
