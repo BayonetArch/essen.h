@@ -92,6 +92,7 @@ static inline char *cx_current_date(char *time_buf, size_t buf_size)
         exit(1);                                                               \
     } while (0);
 
+
 // file logging
 static void cx__logfile__(FILE *fp, CxLogLevel level, bool color,
                           const char *fmt, ...)
