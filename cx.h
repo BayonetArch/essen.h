@@ -14,6 +14,7 @@
 #define LOG_ERROR    CX_LOG_ERROR
 #define UNUSED       CX_UNUSED
 #define SWAP         CX_SWAP
+#define ARR_LEN      CX_ARR_LEN
 #define LAST_ERROR   CX_LAST_ERROR
 #define FILE_LOC     CX_FILE_LOC
 #define current_date cx_current_date
@@ -91,7 +92,6 @@ static inline char *cx_current_date(char *time_buf, size_t buf_size)
                 CX_FILE_LOC(), ##__VA_ARGS__);                                 \
         exit(1);                                                               \
     } while (0);
-
 
 // file logging
 static void cx__logfile__(FILE *fp, CxLogLevel level, bool color,
