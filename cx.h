@@ -228,7 +228,7 @@ static inline const char *cx_shift_args(int *argc, char **argv)
 
 #endif // CX_DA
 
-// #ifdef CX_SB
+#ifdef CX_SB
 
 #define CX_DEF_SB_CAP 64
 #include <stddef.h>
@@ -291,5 +291,5 @@ typedef CxStringBuilder StringBuilder;
 
 #endif /* ifdef CX_STRIP_PREFIX */
 
-// #endif /* ifdef CX_SB */
+#endif /* ifdef CX_SB */
 #endif // CX_H
