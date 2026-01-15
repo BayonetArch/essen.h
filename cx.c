@@ -1,3 +1,12 @@
+/*
+ * cx.c
+ * test cx.h functions and macros
+ * Copyright (c) 2026 BayonetArch
+ *
+ * This software is released under the MIT License.
+ * See LICENSE file for details.
+ */
+
 #define CX_STRIP_PREFIX
 #define CX_DA
 #define CX_SB

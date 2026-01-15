@@ -1,3 +1,11 @@
+/*
+ * cx.h
+ * Copyright (c) 2026 BayonetArch
+ *
+ * This software is released under the MIT License.
+ * See LICENSE file for details.
+ */
+
 #ifndef CX_H
 #define CX_H
 
@@ -173,6 +181,9 @@ static inline const char *cx_shift_args(int *argc, char **argv)
     (*argc)--;
     return program;
 }
+
+// dynamic array based on tsoding implementation:
+// https://github.com/tsoding/nob.h
 
 #ifdef CX_DA
 
