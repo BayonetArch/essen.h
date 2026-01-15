@@ -1,17 +1,17 @@
 # Introduction #
 
-C header for some cxtial macros and functions.
+C header for some essential macros and functions.
 
 # Quick Start #
 
 ```bash
- wget https://raw.githubusercontent.com/BayonetArch/cx.h/refs/heads/master/cx.h
+wget https://raw.githubusercontent.com/BayonetArch/cx.h/refs/heads/master/cx.h
 ```
 
 in a c file: 
 
 ```c
- #include "cx.h"
+#include "cx.h"
 ```
 
 
