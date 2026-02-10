@@ -10,8 +10,8 @@
 #define CX_STRIP_PREFIX
 #define CX_DA
 #define CX_SB
-
 #include "cx.h"
+
 #include <check.h>
 
 typedef struct {
@@ -20,16 +20,12 @@ typedef struct {
     size_t capacity;
 } Da;
 
-#define LOG_TESTFUNCTION() LOGC(LOG_INFO, "%s", __FUNCTION__)
-
 START_TEST(test_logging)
 {
     const char *path = "./test-out/test.log";
-
-    LOG(LOG_INFO, "Some useful info..");
+    LOG(LOG_INFO, "Some useful info.. %d", 10);
     FILE *fp = fopen(path, "w");
-    if (!fp)
-        fatal("Could not open file:%s", LAST_ERROR());
+    if (!fp) fatal("Could not open file:%s", LAST_ERROR());
 
     LOGFILE(fp, LOG_WARN, "the file name is %s", path);
     fclose(fp);
@@ -93,7 +89,7 @@ int main(int argc, char *argv[])
 
     SRunner *sr = srunner_create(s);
     srunner_run_all(sr, CK_VERBOSE);
-    int failed = srunner_ntests_failed(sr);
+    int result = srunner_ntests_failed(sr);
     srunner_free(sr);
 
     if (argc > 1) {
@@ -103,5 +99,5 @@ int main(int argc, char *argv[])
     } else {
         fatalc("No argument provided.");
     }
-    return failed;
+    return result;
 }
