@@ -10,9 +10,11 @@
 #define CX_H
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef CX_STRIP_PREFIX
 
@@ -96,14 +98,14 @@ static inline char *cx_current_date(char *time_buf, size_t buf_size)
 #define cx_fatalc(fmt, ...)                                                    \
     do {                                                                       \
         fprintf(stderr,                                                        \
-                ANSI_GREY("%s:%d:") " " ANSI_RED("fatal error") ": " fmt "\n",  \
+                ANSI_GREY("%s:%d:") " " ANSI_RED("fatal error") ": " fmt "\n", \
                 CX_FILE_LOC(), ##__VA_ARGS__);                                 \
         exit(1);                                                               \
     } while (0);
 
 // file logging
-static void cx__logfile__(FILE *fp, CxLogLevel level, bool color,
-                          const char *fmt, ...)
+__attribute__((unused)) static void
+cx__logfile__(FILE *fp, CxLogLevel level, bool color, const char *fmt, ...)
 {
     char time_buf[64];
     cx_current_date(time_buf, sizeof(time_buf));
@@ -150,8 +152,7 @@ static void cx__logfile__(FILE *fp, CxLogLevel level, bool color,
                     time_buf);
         }
         break;
-    default:
-        cx_fatal("Not a valid log level");
+    default: cx_fatal("Not a valid log level");
     }
 
     vfprintf(fp, fmt, args);
@@ -170,8 +171,7 @@ static void cx__logfile__(FILE *fp, CxLogLevel level, bool color,
 
 static inline const char *cx_shift_args(int *argc, char **argv)
 {
-    if (*argc == 1)
-        return NULL;
+    if (*argc == 1) return NULL;
 
     const char *program = argv[0];
     for (int i = 0; i < *argc - 1; ++i) {
@@ -194,14 +194,12 @@ static inline const char *cx_shift_args(int *argc, char **argv)
         if ((xs)->capacity == 0) {                                             \
             (xs)->capacity = CX_DA_DEF_CAP;                                    \
             (xs)->items    = malloc((xs)->capacity * sizeof(*(xs)->items));    \
-            if (!(xs)->items)                                                  \
-                cx_fatal("memory allocation failed");                          \
+            if (!(xs)->items) cx_fatal("memory allocation failed");            \
         } else if ((xs)->count >= (xs)->capacity) {                            \
             (xs)->capacity *= 2;                                               \
             void *tmp =                                                        \
                 realloc((xs)->items, (xs)->capacity * sizeof(*(xs)->items));   \
-            if (!tmp)                                                          \
-                cx_fatal("memory reallocation failed");                        \
+            if (!tmp) cx_fatal("memory reallocation failed");                  \
             (xs)->items = tmp;                                                 \
         }                                                                      \
         (xs)->items[(xs)->count++] = x;                                        \
